@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>裂縫分布熱點網站</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.16.0/dist/tf.min.js"></script>
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #f9f9f9;
+    }
+    .navbar {
+      height: 10vh;
+      background-color: #2c3e50;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
+    .navbar .title {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    .navbar .nav-buttons button {
+      margin-left: 10px;
+      padding: 5px 12px;
+      border: none;
+      background-color: #3498db;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .main-content {
+      display: flex;
+      height: 90vh;
+    }
+    .left-panel {
+      width: 30%;
+      padding: 20px;
+      background-color: white;
+      border-right: 1px solid #ccc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: start;
+      gap: 20px;
+    }
+    .upload-area {
+      border: 2px dashed #ccc;
+      width: 100%;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      text-align: center;
+      border-radius: 10px;
+      background-color: #fafafa;
+      cursor: pointer;
+    }
+    .slider-control {
+      width: 100%;
+    }
+    .intro-text {
+      font-size: 14px;
+      color: #333;
+      text-align: center;
+    }
+    .right-panel {
+      flex-grow: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+    #previewCanvas {
+      width: 100%;
+      height: auto;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+      background-color: white;
+    }
+    pre {
+      background: #fff;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div class="title">裂縫分布熱點網站</div>
+    <div class="nav-buttons">
+      <button onclick="location.href='index.html'">地圖</button>
+      <button onclick="location.href='predict.html'">上傳裂縫測試</button>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="left-panel">
+      <div class="intro-text">
+        本系統為擋土牆裂縫偵測模型展示平台，<br/>歡迎上傳您手邊的照片進行測試！
+      </div>
+      <div class="upload-area" id="dropzone">
+        拖放圖片或點擊上傳
+        <input type="file" id="imageInput" accept="image/*" style="display:none;">
+      </div>
+      <div class="slider-control">
+        信心閾值：<input type="range" id="confSlider" min="0" max="1" step="0.01" value="0.6" />
+        <span id="confValue">0.60</span>
+      </div>
+    </div>
+
+    <div class="right-panel">
+      <canvas id="previewCanvas" width="960" height="960"></canvas>
+      <p>模型輸出結果：</p>
+      <pre id="output">尚未推理</pre>
+    </div>
+  </div>
+
+  <script>
+    const dropzone = document.getElementById('dropzone');
+    const input = document.getElementById('imageInput');
+    const canvas = document.getElementById('previewCanvas');
+    const ctx = canvas.getContext('2d');
+    const output = document.getElementById('output');
+    const confSlider = document.getElementById('confSlider');
+    const confValue = document.getElementById('confValue');
+    let model, uploadedImage;
+
+    dropzone.addEventListener('click', () => input.click());
+    dropzone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropzone.style.borderColor = '#3498db';
+    });
+    dropzone.addEventListener('dragleave', () => dropzone.style.borderColor = '#ccc');
+    dropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropzone.style.borderColor = '#ccc';
+      handleImage(e.dataTransfer.files[0]);
+    });
+    input.addEventListener('change', e => handleImage(e.target.files[0]));
+
+    confSlider.addEventListener('input', () => {
+      confValue.textContent = parseFloat(confSlider.value).toFixed(2);
+      if (uploadedImage) {
+        ctx.drawImage(uploadedImage, 0, 0, canvas.width, canvas.height);
+        runInference(canvas);
+      }
+    });
+
+    function handleImage(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = new Image();
+        img.onload = () => {
+          uploadedImage = img;
+          canvas.width = 960;
+          canvas.height = 960;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          runInference(canvas);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function runInference(canvas) {
+      try {
+        output.textContent = '🔄 推理中...';
+        if (!model) {
+          model = await tf.loadGraphModel('model/model.json');
+        }
+
+        const confThreshold = parseFloat(confSlider.value);
+
+        const inputTensor = tf.tidy(() => {
+          const img = tf.browser.fromPixels(canvas);
+          return tf.image.resizeBilinear(img, [960, 960])
+            .div(255.0)
+            .expandDims(0);
+        });
+
+        const result = model.execute(inputTensor);
+        const squeezed = result.squeeze();
+        const transposed = squeezed.transpose();
+        const [rawBox, rawScore] = tf.split(transposed, [4, 1], -1);
+
+        const scores = rawScore.squeeze();
+        const boxes = rawBox.arraySync().map(([x, y, w, h]) => {
+          const x1 = (x - w / 2);
+          const y1 = (y - h / 2);
+          const x2 = (x + w / 2);
+          const y2 = (y + h / 2);
+          return [y1, x1, y2, x2];
+        });
+
+        const boxesTensor = tf.tensor2d(boxes);
+        const scoresArray = scores.arraySync();
+        const scoresTensor = tf.tensor1d(scoresArray);
+
+        const indices = await tf.image.nonMaxSuppressionAsync(boxesTensor, scoresTensor, 50, 0.5, confThreshold);
+        const finalBoxes = boxesTensor.gather(indices).arraySync();
+        const finalScores = indices.arraySync().map(i => scoresArray[i]);
+
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#00f';
+        ctx.font = '20px sans-serif';
+        ctx.fillStyle = '#00f';
+
+        finalBoxes.forEach((box, i) => {
+          const [y1, x1, y2, x2] = box;
+          const w = x2 - x1;
+          const h = y2 - y1;
+          const score = finalScores[i];
+          ctx.strokeRect(x1, y1, w, h);
+          ctx.fillText(`框 ${i + 1} (${(score * 100).toFixed(1)}%)`, x1, y1 > 10 ? y1 - 5 : y1 + 15);
+        });
+
+        output.textContent = `✅ 推理完成，共 ${finalBoxes.length} 個預測框。`;
+        tf.dispose([result, inputTensor, boxesTensor, scores, scoresTensor, indices]);
+      } catch (err) {
+        console.error('❌ 推理錯誤：', err);
+        output.textContent = '❌ 推理失敗';
+      }
+    }
+  </script>
+</body>
+</html>

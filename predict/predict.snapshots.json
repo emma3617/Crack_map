@@ -1,0 +1,77 @@
+[
+  {
+    "_id": {
+      "$oid": "67e9334d47d4ae071c646d27"
+    },
+    "url": "https://maps.googleapis.com/maps/api/streetview?size=640x640&location=24.934604667933066,121.66102000098641&heading=138&pitch=-18&fov=30&key=AIzaSyCqXzdlSAUIu9p_MQxRLx4dFXiUJua3gno",
+    "lat": 24.934604667933066,
+    "lng": 121.66102000098641,
+    "dataset": {
+      "$oid": "67e92c27314b21b980e8b6de"
+    },
+    "createdAt": {
+      "$date": "2025-03-30T12:04:29.802Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "67e936a847d4ae071c646d5f"
+    },
+    "url": "https://maps.googleapis.com/maps/api/streetview?size=640x640&location=24.935313120014655,121.65702504088331&heading=157&pitch=-28&fov=30&key=AIzaSyCqXzdlSAUIu9p_MQxRLx4dFXiUJua3gno",
+    "lat": 24.935313120014655,
+    "lng": 121.65702504088331,
+    "dataset": {
+      "$oid": "67e92c27314b21b980e8b6de"
+    },
+    "createdAt": {
+      "$date": "2025-03-30T12:18:48.844Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "67e9506c07996b75b6746292"
+    },
+    "url": "https://maps.googleapis.com/maps/api/streetview?size=640x640&location=24.93504980492728,121.65753438265196&heading=119&pitch=-29&fov=30&key=AIzaSyCqXzdlSAUIu9p_MQxRLx4dFXiUJua3gno",
+    "lat": 24.93504980492728,
+    "lng": 121.65753438265196,
+    "dataset": {
+      "$oid": "67e92c27314b21b980e8b6de"
+    },
+    "createdAt": {
+      "$date": "2025-03-30T14:08:44.580Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "67e954ed678050ce140019c9"
+    },
+    "url": "https://maps.googleapis.com/maps/api/streetview?size=640x640&location=24.934767554564047,121.66079157466467&heading=321&pitch=-31&fov=30&key=AIzaSyCqXzdlSAUIu9p_MQxRLx4dFXiUJua3gno",
+    "lat": 24.934767554564047,
+    "lng": 121.66079157466467,
+    "dataset": {
+      "$oid": "67e92c27314b21b980e8b6de"
+    },
+    "createdAt": {
+      "$date": "2025-03-30T14:27:57.176Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "67e9555b678050ce140019d1"
+    },
+    "url": "https://maps.googleapis.com/maps/api/streetview?size=640x640&location=24.934895057085843,121.65939324743604&heading=276&pitch=-35&fov=30&key=AIzaSyCqXzdlSAUIu9p_MQxRLx4dFXiUJua3gno",
+    "lat": 24.934895057085843,
+    "lng": 121.65939324743604,
+    "dataset": {
+      "$oid": "67e92c27314b21b980e8b6de"
+    },
+    "createdAt": {
+      "$date": "2025-03-30T14:29:47.936Z"
+    },
+    "__v": 0
+  }
+]

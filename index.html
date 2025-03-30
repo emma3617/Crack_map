@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>地圖切換示範</title>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="navbar">
+    <div class="title">裂縫分布熱點網站</div>
+    <div class="nav-buttons">
+      <button onclick="location.href='index.html'">地圖</button>
+      <button onclick="location.href='predict.html'">上傳裂縫測試</button>
+    </div>
+  </div>
+
+  <div class="map-container">
+    <div id="map"></div>
+    <div class="legend-panel">
+      <details open>
+        <summary>圖層與圖例</summary>
+        <div class="control-group">
+          <label><input type="checkbox" id="landsatToggle" checked> Landsat 9 NDVI 變異區域</label>
+          <input type="range" min="0" max="1" step="0.01" value="1" id="landsatOpacity">
+        </div>
+        <div class="control-group">
+          <label><input type="checkbox" id="sentinelToggle" checked> Sentinel 2 NDVI 變異區域</label>
+          <input type="range" min="0" max="1" step="0.01" value="1" id="sentinelOpacity">
+        </div>
+        <div class="control-group">
+          <button id="basemapToggleBtn">切換底圖</button>
+        </div>
+        <div class="filter-group">
+          <label for="typeFilter">篩選事件點位：</label>
+          <select id="typeFilter">
+            <option value="all">所有類型</option>
+            <option value="落石">落石</option>
+            <option value="邊坡崩塌">邊坡崩塌</option>
+            <option value="道路裂縫">道路裂縫</option>
+            <option value="擋土牆裂縫">擋土牆裂縫</option>
+            <option value="房屋裂縫">房屋裂縫</option>
+            <option value="樹倒">樹倒</option>
+          </select>
+        </div>
+        <ul>
+          <li><span class="legend-icon icon-red"></span>回報事件點位</li>
+          <li><span class="legend-icon icon-blue"></span>模型推理裂縫點位</li>
+          <li><img src="icon/Landsat9_icon.png" alt="Landsat 9" style="width:16px; height:16px; margin-right:8px;">Landsat 9 NDVI 變異區域（30m）</li>
+          <li><img src="icon/Sentinel2_icon.png" alt="Sentinel 2" style="width:16px; height:16px; margin-right:8px;">Sentinel 2 NDVI 變異區域（10m）</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
